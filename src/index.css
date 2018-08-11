@@ -1,0 +1,57 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+}
+
+ol, ul {
+  padding-left: 30px;
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin: 10px 0;
+}
+
+.mine-button {
+  background: #eee;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 34px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
+}
+.mine-opened {
+  background-color: #fff;
+}
+.mine-button:focus {
+  outline: none;
+}
+
+.kbd-navigation .mine-button:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-info {
+  margin-left: 20px;
+}
+.game-board {
+  border: 1px solid #333;
+  padding: 20px;
+}
