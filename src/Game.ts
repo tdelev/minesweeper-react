@@ -5,32 +5,30 @@ export class Game {
     }
 }
 
+const BOMBS_PROBABILITY = 0.1;
+
 const dx = [-1, 0, 1, -1, 1, -1, 0, 1];
 const dy = [-1, -1, -1, 0, 0, 1, 1, 1];
 
 export const newGame = function (rows: number, columns: number): Game {
     const state = Array(rows).fill(null).map((r, i: number) => {
         return Array(columns).fill(null).map((c, j: number) => {
-            const isBomb = Math.random() < 0.2;
+            const isBomb = Math.random() < BOMBS_PROBABILITY;
             return new Mine({x: i, y: j}, false, isBomb, 0);
         });
     });
-    for (let i = 0; i < state.length; ++i) {
-        for (let j = 0; j < state[i].length; ++j) {
-            const field = state[i][j];
-            if (field.isMine) {
-                field.bombs = -1;
-                for (let k = 0; k < dx.length; ++k) {
-                    let ii = i + dx[k];
-                    let jj = j + dy[k];
-                    if (ii >= 0 && ii < state.length && jj >= 0 && jj < state[0].length) {
-                        if (!state[ii][jj].isMine)
-                            state[ii][jj].bombs += 1;
+    state.forEach((row, i) => {
+        row.forEach((mine, j) => {
+            if (mine.isMine) {
+                mine.bombs = -1;
+                traverseNeighbours(state, mine, nf => {
+                    if (!nf.isMine) {
+                        nf.bombs += 1;
                     }
-                }
+                });
             }
-        }
-    }
+        });
+    });
     return new Game(state);
 };
 
@@ -45,7 +43,7 @@ function endGame(game: Game): Game {
 }
 
 export const onOpen = function (game: Game, field: Mine): Game {
-    if (field.isMarked) return game;
+    if (field.isMarked && field.isOpened) return game;
     if (field.isMine) {
         return endGame(game);
     } else {
@@ -65,6 +63,7 @@ export const onOpen = function (game: Game, field: Mine): Game {
 };
 
 export const onMark = function (game: Game, opened: Mine): Game {
+    if (opened.isOpened) return game;
     return update(game.state, (field: Mine) => {
         if (field == opened) {
             return new Mine(field.position, false, field.isMine, field.bombs, !field.isMarked);

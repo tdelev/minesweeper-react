@@ -6,6 +6,7 @@ import { checkCompleted, Game, Mine, newGame, onExplore, onMark, onOpen } from '
 
 class App extends React.Component<AppProps> {
     controlDown = false;
+    shiftDown = false;
     state = {
         game: newGame(this.props.rows, this.props.columns),
         completed: false
@@ -15,15 +16,25 @@ class App extends React.Component<AppProps> {
         return code === "ControlLeft" || code === "ControlRight";
     }
 
+    isShiftKey(code: string) {
+        return code === "ShiftLeft" || code === "ShiftRight";
+    }
+
     componentDidMount() {
         document.onkeydown = (e: KeyboardEvent) => {
             if (this.isControlKey(e.code)) {
                 this.controlDown = true;
             }
+            if (this.isShiftKey(e.code)) {
+                this.shiftDown = true;
+            }
         };
         document.onkeyup = (e: KeyboardEvent) => {
             if (this.isControlKey(e.code)) {
                 this.controlDown = false;
+            }
+            if (this.isShiftKey(e.code)) {
+                this.shiftDown = false;
             }
         };
     }
@@ -39,17 +50,17 @@ class App extends React.Component<AppProps> {
     }
 
     public onSquareLeftClick(field: Mine) {
-        console.log('left click');
         if (this.controlDown) {
             this.updateState(field, onExplore);
-        } else {
+        } else if (this.shiftDown) {
             this.updateState(field, onOpen);
+        } else {
+            this.updateState(field, onMark);
         }
     }
 
     public onSquareRightClick(field: Mine) {
-        console.log('right click');
-        this.updateState(field, onMark);
+        //this.updateState(field, onMark);
     }
 
     public render() {
