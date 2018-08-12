@@ -1,52 +1,73 @@
 import * as React from 'react';
 import './App.css';
 
-import { Board } from './components/Board';
-import { Point } from './components/Square';
-import { newGame, onOpen, onGuess, checkCompleted, Game } from './Game';
+import { MineField } from './components/MineField';
+import { checkCompleted, Game, Mine, newGame, onExplore, onMark, onOpen } from './Game';
 
 class App extends React.Component<AppProps> {
+    controlDown = false;
+    state = {
+        game: newGame(this.props.rows, this.props.columns),
+        completed: false
+    };
 
-  state = {
-    game: newGame(this.props.rows, this.props.columns),
-    completed: false
-  }
-  constructor(props: AppProps) {
-    super(props);
-  }
+    isControlKey(code: string) {
+        return code === "ControlLeft" || code === "ControlRight";
+    }
 
-  updateState(position: Point, updateFn: (game: Game, position: Point) => Game) {
-    this.setState((prevState: any, props) => {
-      const updatedGame = updateFn(prevState.game, position);
-      return {
-        game: updatedGame,
-        completed: checkCompleted(updatedGame)
-      };
-    });
-  }
+    componentDidMount() {
+        document.onkeydown = (e: KeyboardEvent) => {
+            if (this.isControlKey(e.code)) {
+                this.controlDown = true;
+            }
+        };
+        document.onkeyup = (e: KeyboardEvent) => {
+            if (this.isControlKey(e.code)) {
+                this.controlDown = false;
+            }
+        };
+    }
 
-  public onSquareLeftClick(position: Point) {
-    this.updateState(position, onOpen);
-  }
+    updateState(field: Mine, updateFn: (game: Game, field: Mine) => Game) {
+        this.setState((prevState: any, props) => {
+            const updatedGame = updateFn(prevState.game, field);
+            return {
+                game: updatedGame,
+                completed: checkCompleted(updatedGame)
+            };
+        });
+    }
 
-  public onSquareRightClick(position: Point) {
-    this.updateState(position, onGuess);
-  }
+    public onSquareLeftClick(field: Mine) {
+        console.log('left click');
+        if (this.controlDown) {
+            this.updateState(field, onExplore);
+        } else {
+            this.updateState(field, onOpen);
+        }
+    }
 
-  public render() {
-    return (
-      <div className="game">
-        <Board
-          game={this.state.game}
-          onSquareLeftClick={(position) => this.onSquareLeftClick(position)}
-          onSquareRightClick={(position) => this.onSquareRightClick(position)} />
-        <div className='status'>Completed: {this.state.completed ? 'YES' : 'NO'}</div>
-      </div>
-    );
-  }
+    public onSquareRightClick(field: Mine) {
+        console.log('right click');
+        this.updateState(field, onMark);
+    }
+
+    public render() {
+        return (
+            <div className="game">
+                <MineField
+                    game={this.state.game}
+                    onLeftClick={(field: Mine) => this.onSquareLeftClick(field)}
+                    onRightClick={(field: Mine) => this.onSquareRightClick(field)}/>
+                <div className='status'>Completed: {this.state.completed ? 'YES' : 'NO'}</div>
+            </div>
+        );
+    }
 }
+
 export interface AppProps {
-  rows: number;
-  columns: number;
+    rows: number;
+    columns: number;
 }
+
 export default App;

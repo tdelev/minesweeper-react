@@ -5,7 +5,7 @@ import './index.css';
 import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(
-  <App rows={6} columns={5} />,
+  <App rows={10} columns={14} />,
   document.getElementById('root') as HTMLElement
 );
 registerServiceWorker();

@@ -1,9 +1,10 @@
-import { Point } from "./components/Square";
+import { Point } from "./components/MineSquare";
 
 export class Game {
-    constructor(public state: Array<Array<BoardField>>) {
+    constructor(public state: Array<Array<Mine>>) {
     }
 }
+
 const dx = [-1, 0, 1, -1, 1, -1, 0, 1];
 const dy = [-1, -1, -1, 0, 0, 1, 1, 1];
 
@@ -11,19 +12,19 @@ export const newGame = function (rows: number, columns: number): Game {
     const state = Array(rows).fill(null).map((r, i: number) => {
         return Array(columns).fill(null).map((c, j: number) => {
             const isBomb = Math.random() < 0.2;
-            return new BoardField(false, isBomb, 0);
+            return new Mine({x: i, y: j}, false, isBomb, 0);
         });
     });
     for (let i = 0; i < state.length; ++i) {
         for (let j = 0; j < state[i].length; ++j) {
             const field = state[i][j];
-            if (field.isBomb) {
+            if (field.isMine) {
                 field.bombs = -1;
                 for (let k = 0; k < dx.length; ++k) {
                     let ii = i + dx[k];
                     let jj = j + dy[k];
                     if (ii >= 0 && ii < state.length && jj >= 0 && jj < state[0].length) {
-                        if (!state[ii][jj].isBomb)
+                        if (!state[ii][jj].isMine)
                             state[ii][jj].bombs += 1;
                     }
                 }
@@ -31,48 +32,92 @@ export const newGame = function (rows: number, columns: number): Game {
         }
     }
     return new Game(state);
+};
+
+function endGame(game: Game): Game {
+    return update(game.state, (field) => {
+        if (field.isMine) {
+            return new Mine(field.position, true, field.isMine, field.bombs, field.isMarked);
+        } else {
+            return new Mine(field.position, field.isOpened, field.isMine, field.bombs, field.isMarked);
+        }
+    });
 }
 
-export const onOpen = function (game: Game, position: Point): Game {
-    const opened = game.state[position.x][position.y];
-    if (opened.isBomb) {
-        return update(game.state, (field) => {
-            return new BoardField(true, field.isBomb, field.bombs, field.marked);
-        });
+export const onOpen = function (game: Game, field: Mine): Game {
+    if (field.isMarked) return game;
+    if (field.isMine) {
+        return endGame(game);
     } else {
-        const openField = (openedField: BoardField) => (field: BoardField) => {
+        const openField = (openedField: Mine) => (field: Mine) => {
             if (field === openedField) {
-                return new BoardField(true, field.isBomb, field.bombs, false);
+                return new Mine(field.position, true, field.isMine, field.bombs, false);
             } else {
-                return new BoardField(field.isOpened, field.isBomb, field.bombs, field.marked);
+                return new Mine(field.position, field.isOpened, field.isMine, field.bombs, field.isMarked);
             }
         };
-        let result = update(game.state, openField(opened));
-        if (opened.bombs == 0) {
-            const state = result.state;
-            updateZeros(state, position);
+        let result = update(game.state, openField(field));
+        if (field.bombs == 0) {
+            updateZeros(result.state, field);
         }
         return result;
     }
-}
+};
 
-function updateZeros(fields: Array<Array<BoardField>>, start: Point) {
-    for (let k = 0; k < dx.length; ++k) {
-        let ii = start.x + dx[k];
-        let jj = start.y + dy[k];
-        if (ii >= 0 && ii < fields.length && jj >= 0 && jj < fields[0].length) {
-            const neighborField = fields[ii][jj];
-            if (!neighborField.isOpened) {
-                neighborField.isOpened = true;
-                if (neighborField.bombs == 0) {
-                    updateZeros(fields, { x: ii, y: jj });
+export const onMark = function (game: Game, opened: Mine): Game {
+    return update(game.state, (field: Mine) => {
+        if (field == opened) {
+            return new Mine(field.position, false, field.isMine, field.bombs, !field.isMarked);
+        } else {
+            return new Mine(field.position, field.isOpened, field.isMine, field.bombs, field.isMarked);
+        }
+    });
+};
+
+export const onExplore = function (game: Game, opened: Mine): Game {
+    const updated = update(game.state, (field: Mine) => field);
+    let hitMine = false;
+    traverseNeighbours(updated.state, opened, field => {
+        if (!field.isOpened && !field.isMarked) {
+            if (field.isMine) {
+                hitMine = true;
+            } else {
+                field.isOpened = true;
+                if (field.bombs == 0) {
+                    updateZeros(updated.state, field);
                 }
             }
+        }
+    });
+    if (hitMine) {
+        return endGame(game);
+    }
+    return updated;
+};
+
+function traverseNeighbours(fields: Array<Array<Mine>>, startMine: Mine, onField: (field: Mine) => void) {
+    const start = startMine.position;
+    for (let i = 0; i < dx.length; ++i) {
+        let ii = start.x + dx[i];
+        let jj = start.y + dy[i];
+        if (ii >= 0 && ii < fields.length && jj >= 0 && jj < fields[0].length) {
+            onField(fields[ii][jj]);
         }
     }
 }
 
-function update(fields: Array<Array<BoardField>>, f: ((b: BoardField) => BoardField)): Game {
+function updateZeros(fields: Array<Array<Mine>>, start: Mine) {
+    traverseNeighbours(fields, start, (field => {
+        if (!field.isOpened && !field.isMine) {
+            field.isOpened = true;
+            if (field.bombs == 0) {
+                updateZeros(fields, field);
+            }
+        }
+    }));
+}
+
+function update(fields: Array<Array<Mine>>, f: ((b: Mine) => Mine)): Game {
     const updated = fields.slice().map(row => {
         return row.slice().map(field => {
             return f(field);
@@ -81,37 +126,24 @@ function update(fields: Array<Array<BoardField>>, f: ((b: BoardField) => BoardFi
     return new Game(updated);
 }
 
-export const onGuess = function (game: Game, position: Point): Game {
-    const opened = game.state[position.x][position.y];
-    return update(game.state, (field: BoardField) => {
-        if (field == opened) {
-            return new BoardField(false, field.isBomb, field.bombs, !field.marked);
-        } else {
-            return new BoardField(field.isOpened, field.isBomb, field.bombs, field.marked);
-        }
-    });
-}
 
 export const checkCompleted = function (game: Game): boolean {
     const and = (a: boolean, b: boolean) => a && b;
     return game.state.map(row => {
         return row.map(field => {
-            const ok = ((field.isBomb && field.marked) || (!field.isBomb && !field.marked && field.isOpened)) &&
-                ((field.isOpened && !field.isBomb) || (!field.isOpened && field.isBomb));
-                if(!ok)
-            console.log('field', field);
-            //console.log(ok);
-            return ok;
+            return ((field.isMine && field.isMarked) || (!field.isMine && !field.isMarked && field.isOpened)) &&
+                ((field.isOpened && !field.isMine) || (!field.isOpened && field.isMine));
         }).reduce(and);
     }).reduce(and);
-}
+};
 
-export class BoardField {
+export class Mine {
     constructor(
+        public position: Point,
         public isOpened = false,
-        public isBomb = false,
+        public isMine = false,
         public bombs = 0,
-        public marked = false,
+        public isMarked = false,
     ) {
     }
 }

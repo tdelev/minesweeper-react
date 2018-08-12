@@ -55,3 +55,21 @@ ol, ul {
   border: 1px solid #333;
   padding: 20px;
 }
+.bombs-1 {
+    color: #00f;
+}
+.bombs-2 {
+    color: #0f0;
+}
+.bombs-3 {
+    color: #f00;
+}
+.bombs-4 {
+    color: #0ff;
+}
+.bombs-5 {
+    color: #f0f;
+}
+.bombs-6 {
+    color: #ff0;
+}

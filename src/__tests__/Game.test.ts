@@ -1,172 +1,25 @@
-import { checkCompleted } from "./../Game";
+import { checkCompleted } from "../Game";
 
 test('game is completed', () => {
-  const state = {
-    "state": [
-      [
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        }
-      ],
-      [
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 2,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 2,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        }
-      ],
-      [
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 2,
-          "marked": false
-        },
-        {
-          "isOpened": false,
-          "isBomb": true,
-          "bombs": -1,
-          "marked": true
-        },
-        {
-          "isOpened": false,
-          "isBomb": true,
-          "bombs": -1,
-          "marked": true
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        }
-      ],
-      [
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        },
-        {
-          "isOpened": false,
-          "isBomb": true,
-          "bombs": -1,
-          "marked": true
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 3,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 2,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        }
-      ],
-      [
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 1,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        },
-        {
-          "isOpened": true,
-          "isBomb": false,
-          "bombs": 0,
-          "marked": false
-        }
-      ]
-    ]
-  };
+    const state = {
+        "state": [[
+            {
+                "position": {x: 0, y: 0},
+                "isOpened": false,
+                "isMine": true,
+                "bombs": -1,
+                "isMarked": true
+            },
+            {
+                "position": {x: 0, y: 1},
+                "isOpened": true,
+                "isMine": false,
+                "bombs": 1,
+                "isMarked": false
+            }
+        ]]
+    };
 
-  const isCompleted = checkCompleted(state);
-  console.log(isCompleted);
-  expect(isCompleted).toBeTruthy();
-})
+    const isCompleted = checkCompleted(state);
+    expect(isCompleted).toBeTruthy();
+});
