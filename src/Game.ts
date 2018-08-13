@@ -1,11 +1,11 @@
 import { Point } from "./components/MineSquare";
 
 export class Game {
-    constructor(public state: Array<Array<Mine>>) {
+    constructor(public state: Array<Array<Mine>>, public exploded = false) {
     }
 }
 
-const BOMBS_PROBABILITY = 0.1;
+const BOMBS_PROBABILITY = 0.15;
 
 const dx = [-1, 0, 1, -1, 1, -1, 0, 1];
 const dy = [-1, -1, -1, 0, 0, 1, 1, 1];
@@ -14,7 +14,7 @@ export const newGame = function (rows: number, columns: number): Game {
     const state = Array(rows).fill(null).map((r, i: number) => {
         return Array(columns).fill(null).map((c, j: number) => {
             const isBomb = Math.random() < BOMBS_PROBABILITY;
-            return new Mine({x: i, y: j}, false, isBomb, 0);
+            return new Mine({ x: i, y: j }, false, isBomb, 0);
         });
     });
     state.forEach((row, i) => {
@@ -39,7 +39,7 @@ function endGame(game: Game): Game {
         } else {
             return new Mine(field.position, field.isOpened, field.isMine, field.bombs, field.isMarked);
         }
-    });
+    }, true);
 }
 
 export const onOpen = function (game: Game, field: Mine): Game {
@@ -116,13 +116,13 @@ function updateZeros(fields: Array<Array<Mine>>, start: Mine) {
     }));
 }
 
-function update(fields: Array<Array<Mine>>, f: ((b: Mine) => Mine)): Game {
+function update(fields: Array<Array<Mine>>, f: ((b: Mine) => Mine), exploded = false): Game {
     const updated = fields.slice().map(row => {
         return row.slice().map(field => {
             return f(field);
         });
     });
-    return new Game(updated);
+    return new Game(updated, exploded);
 }
 
 
