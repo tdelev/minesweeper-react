@@ -90,11 +90,11 @@ class App extends React.Component<AppProps> {
                 <Timer elapsedSeconds={this.state.elapsedSeconds}/>
                 <div className='status'>Completed: {this.state.completed ? 'YES' : 'NO'}</div>
                 <div className='help'>
-                    <h3>Help</h3>
+                    <h3>How to play</h3>
                     <ol>
-                        <li>Left Click to mark mine</li>
-                        <li>Shift + Left Click to open mine</li>
-                        <li>Ctrl + Left Click to explore fields</li>
+                        <li>Left Click to mark possible mine</li>
+                        <li>Shift + Left Click to open field</li>
+                        <li>Ctrl + Left Click to explore fields around opened field</li>
                     </ol>
                 </div>
             </div>

@@ -6,16 +6,14 @@ test('game is completed', () => {
             {
                 "position": { x: 0, y: 0 },
                 "isOpened": false,
-                "isMine": true,
                 "bombs": -1,
-                "isMarked": true
+                "isFlagged": true
             },
             {
                 "position": { x: 0, y: 1 },
                 "isOpened": true,
-                "isMine": false,
                 "bombs": 1,
-                "isMarked": false
+                "isFlagged": false
             }
         ]],
         "exploded": false

@@ -14,17 +14,18 @@ export const newGame = function (rows: number, columns: number): Game {
     const state = Array(rows).fill(null).map((r, i: number) => {
         return Array(columns).fill(null).map((c, j: number) => {
             const isBomb = Math.random() < BOMBS_PROBABILITY;
-            return new Mine({ x: i, y: j }, false, isBomb, 0);
+            return new Mine({ x: i, y: j }, false, isBomb ? -1 : 0, false);
         });
     });
     state.forEach((row, i) => {
         row.forEach((mine, j) => {
-            if (mine.isMine) {
+            if (isMine(mine)) {
                 mine.bombs = -1;
                 traverseNeighbours(state, mine, nf => {
-                    if (!nf.isMine) {
+                    if (!isMine(nf)) {
                         nf.bombs += 1;
                     }
+                    return nf;
                 });
             }
         });
@@ -34,24 +35,24 @@ export const newGame = function (rows: number, columns: number): Game {
 
 function endGame(game: Game): Game {
     return update(game.state, (field) => {
-        if (field.isMine) {
-            return new Mine(field.position, true, field.isMine, field.bombs, field.isMarked);
+        if (isMine(field)) {
+            return new Mine(field.position, true, field.bombs, field.isFlagged);
         } else {
-            return new Mine(field.position, field.isOpened, field.isMine, field.bombs, field.isMarked);
+            return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
         }
     }, true);
 }
 
 export const onOpen = function (game: Game, field: Mine): Game {
-    if (field.isMarked && field.isOpened) return game;
-    if (field.isMine) {
+    if (field.isFlagged && field.isOpened) return game;
+    if (isMine(field)) {
         return endGame(game);
     } else {
         const openField = (openedField: Mine) => (field: Mine) => {
             if (field === openedField) {
-                return new Mine(field.position, true, field.isMine, field.bombs, false);
+                return new Mine(field.position, true, field.bombs, false);
             } else {
-                return new Mine(field.position, field.isOpened, field.isMine, field.bombs, field.isMarked);
+                return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
             }
         };
         let result = update(game.state, openField(field));
@@ -66,9 +67,9 @@ export const onMark = function (game: Game, opened: Mine): Game {
     if (opened.isOpened) return game;
     return update(game.state, (field: Mine) => {
         if (field == opened) {
-            return new Mine(field.position, false, field.isMine, field.bombs, !field.isMarked);
+            return new Mine(field.position, false, field.bombs, !field.isFlagged);
         } else {
-            return new Mine(field.position, field.isOpened, field.isMine, field.bombs, field.isMarked);
+            return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
         }
     });
 };
@@ -77,8 +78,8 @@ export const onExplore = function (game: Game, opened: Mine): Game {
     const updated = update(game.state, (field: Mine) => field);
     let hitMine = false;
     traverseNeighbours(updated.state, opened, field => {
-        if (!field.isOpened && !field.isMarked) {
-            if (field.isMine) {
+        if (!field.isOpened && !field.isFlagged) {
+            if (isMine(field)) {
                 hitMine = true;
             } else {
                 field.isOpened = true;
@@ -87,6 +88,7 @@ export const onExplore = function (game: Game, opened: Mine): Game {
                 }
             }
         }
+        return field;
     });
     if (hitMine) {
         return endGame(game);
@@ -94,25 +96,30 @@ export const onExplore = function (game: Game, opened: Mine): Game {
     return updated;
 };
 
-function traverseNeighbours(fields: Array<Array<Mine>>, startMine: Mine, onField: (field: Mine) => void) {
+function traverseNeighbours(fields: Array<Array<Mine>>, startMine: Mine, onField: (field: Mine) => Mine) {
     const start = startMine.position;
-    for (let i = 0; i < dx.length; ++i) {
+    dx.map((x, i) => [x, dy[i]])
+        .map(deltas => [start.x + deltas[0], start.y + deltas[1]])
+        .filter(indexes => indexes[0] >= 0 && indexes[0] < fields.length && indexes[1] >= 0 && indexes[1] < fields[0].length)
+        .map(indexes => onField(fields[indexes[0]][indexes[1]]));
+    /*for (let i = 0; i < dx.length; ++i) {
         let ii = start.x + dx[i];
         let jj = start.y + dy[i];
         if (ii >= 0 && ii < fields.length && jj >= 0 && jj < fields[0].length) {
             onField(fields[ii][jj]);
         }
-    }
+    }*/
 }
 
 function updateZeros(fields: Array<Array<Mine>>, start: Mine) {
     traverseNeighbours(fields, start, (field => {
-        if (!field.isOpened && !field.isMine) {
+        if (!field.isOpened && !isMine(field)) {
             field.isOpened = true;
             if (field.bombs == 0) {
                 updateZeros(fields, field);
             }
         }
+        return field;
     }));
 }
 
@@ -130,8 +137,8 @@ export const checkCompleted = function (game: Game): boolean {
     const and = (a: boolean, b: boolean) => a && b;
     return game.state.map(row => {
         return row.map(field => {
-            return ((field.isMine && field.isMarked) || (!field.isMine && !field.isMarked && field.isOpened)) &&
-                ((field.isOpened && !field.isMine) || (!field.isOpened && field.isMine));
+            return ((isMine(field) && field.isFlagged) || (!isMine(field) && !field.isFlagged && field.isOpened)) &&
+                ((field.isOpened && !isMine(field)) || (!field.isOpened && isMine(field)));
         }).reduce(and);
     }).reduce(and);
 };
@@ -140,9 +147,12 @@ export class Mine {
     constructor(
         public position: Point,
         public isOpened = false,
-        public isMine = false,
         public bombs = 0,
-        public isMarked = false,
+        public isFlagged = false,
     ) {
     }
+}
+
+function isMine(mine: Mine) {
+    return mine.bombs === -1;
 }

@@ -14,10 +14,11 @@ export class MineSquare extends React.Component<MineProps> {
                 return (<span className={`bombs-${field.bombs}`}>{field.bombs}</span>);
             } else if (field.bombs == 0) {
                 return ''
+            } else {
+                return (<i className='fas fa-xs fa-bomb bomb'/>);
             }
-            return (<i className='fas fa-xs fa-bomb bomb'/>);
         } else {
-            if (field.isMarked) {
+            if (field.isFlagged) {
                 return (<i className='fas fa-xs fa-flag'/>);
             } else {
                 return '';
