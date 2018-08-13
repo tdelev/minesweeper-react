@@ -44,8 +44,8 @@ function endGame(game: Game): Game {
 }
 
 export const onOpen = function (game: Game, field: Mine): Game {
-    if (field.isFlagged && field.isOpened) return game;
-    if (isMine(field)) {
+    if (field.isFlagged) return game;
+    else if (isMine(field)) {
         return endGame(game);
     } else {
         const openField = (openedField: Mine) => (field: Mine) => {
@@ -64,7 +64,7 @@ export const onOpen = function (game: Game, field: Mine): Game {
 };
 
 export const onMark = function (game: Game, opened: Mine): Game {
-    if (opened.isOpened) return game;
+    if (opened.isOpened && !opened.isFlagged) return onExplore(game, opened);
     return update(game.state, (field: Mine) => {
         if (field == opened) {
             return new Mine(field.position, false, field.bombs, !field.isFlagged);
@@ -74,7 +74,7 @@ export const onMark = function (game: Game, opened: Mine): Game {
     });
 };
 
-export const onExplore = function (game: Game, opened: Mine): Game {
+const onExplore = function (game: Game, opened: Mine): Game {
     const updated = update(game.state, (field: Mine) => field);
     let hitMine = false;
     traverseNeighbours(updated.state, opened, field => {

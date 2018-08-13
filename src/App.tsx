@@ -2,12 +2,11 @@ import * as React from 'react';
 import './App.css';
 
 import { MineField } from './components/MineField';
-import { checkCompleted, Game, Mine, newGame, onExplore, onMark, onOpen } from './Game';
+import { checkCompleted, Game, Mine, newGame, onMark, onOpen } from './Game';
 import { Timer } from './components/Timer';
 
 class App extends React.Component<AppProps> {
     controlDown = false;
-    shiftDown = false;
     startTime: Date;
     state = {
         game: newGame(this.props.rows, this.props.columns),
@@ -19,10 +18,6 @@ class App extends React.Component<AppProps> {
         return code === "ControlLeft" || code === "ControlRight";
     }
 
-    isShiftKey(code: string) {
-        return code === "ShiftLeft" || code === "ShiftRight";
-    }
-
     timer: any;
 
     componentDidMount() {
@@ -30,16 +25,10 @@ class App extends React.Component<AppProps> {
             if (this.isControlKey(e.code)) {
                 this.controlDown = true;
             }
-            if (this.isShiftKey(e.code)) {
-                this.shiftDown = true;
-            }
         };
         document.onkeyup = (e: KeyboardEvent) => {
             if (this.isControlKey(e.code)) {
                 this.controlDown = false;
-            }
-            if (this.isShiftKey(e.code)) {
-                this.shiftDown = false;
             }
         };
         this.startTime = new Date();
@@ -68,8 +57,6 @@ class App extends React.Component<AppProps> {
 
     public onSquareLeftClick(field: Mine) {
         if (this.controlDown) {
-            this.updateState(field, onExplore);
-        } else if (this.shiftDown) {
             this.updateState(field, onOpen);
         } else {
             this.updateState(field, onMark);
@@ -92,9 +79,8 @@ class App extends React.Component<AppProps> {
                 <div className='help'>
                     <h3>How to play</h3>
                     <ol>
-                        <li>Left Click to mark possible mine</li>
-                        <li>Shift + Left Click to open field</li>
-                        <li>Ctrl + Left Click to explore fields around opened field</li>
+                        <li>Left Click to mark possible mine or to explore fields around opened field</li>
+                        <li>Ctrl + Left Click to open field</li>
                     </ol>
                 </div>
             </div>
