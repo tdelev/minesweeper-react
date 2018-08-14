@@ -2,7 +2,7 @@ import * as React from 'react';
 import './App.css';
 
 import { MineField } from './components/MineField';
-import { checkCompleted, Game, Mine, newGame, onMark, onOpen } from './Game';
+import { checkCompleted, countFlagged, Game, Mine, newGame, onMark, onOpen } from './Game';
 import { Timer } from './components/Timer';
 
 class App extends React.Component<AppProps> {
@@ -11,6 +11,7 @@ class App extends React.Component<AppProps> {
     state = {
         game: newGame(this.props.rows, this.props.columns),
         completed: false,
+        flagged: 0,
         elapsedSeconds: 0
     };
 
@@ -50,7 +51,8 @@ class App extends React.Component<AppProps> {
             }
             return {
                 game: updatedGame,
-                completed: completed
+                completed: completed,
+                flagged: countFlagged(updatedGame)
             };
         });
     }
@@ -76,6 +78,7 @@ class App extends React.Component<AppProps> {
                     onRightClick={(field: Mine) => this.onSquareRightClick(field)}/>
                 <Timer elapsedSeconds={this.state.elapsedSeconds}/>
                 <div className='status'>Completed: {this.state.completed ? 'YES' : 'NO'}</div>
+                <div className='status'>{this.state.flagged}/{this.state.game.totalBombs}</div>
                 <div className='help'>
                     <h3>How to play</h3>
                     <ol>
