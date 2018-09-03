@@ -10,6 +10,8 @@ class App extends React.Component<AppProps> {
     controlDown = false;
     startTime: Date;
     state = {
+        rows: this.props.rows,
+        columns: this.props.columns,
         game: game.newGame(this.props.rows, this.props.columns),
         completed: false,
         flagged: 0,
@@ -33,6 +35,10 @@ class App extends React.Component<AppProps> {
                 this.controlDown = false;
             }
         };
+        this.startTimer();
+    }
+
+    startTimer() {
         this.startTime = new Date();
         this.timer = setInterval(() => {
             const now = new Date();
@@ -70,9 +76,29 @@ class App extends React.Component<AppProps> {
         //this.updateState(field, onMark);
     }
 
+    startGame(rows: number, columns: number) {
+        clearInterval(this.timer);
+        this.startTimer();
+        this.setState({
+            rows: rows,
+            columns: columns,
+            game: game.newGame(rows, columns),
+            completed: false,
+            flagged: 0,
+            elapsedSeconds: 0
+        });
+    }
+
     public render() {
         return (
             <div className="game">
+                <div className="menu">
+                    <ul className="level-menu">
+                        <li onClick={(e) => this.startGame(6, 8)}>Easy</li>
+                        <li onClick={(e) => this.startGame(10, 14)}>Medium</li>
+                        <li onClick={(e) => this.startGame(20, 30)}>Hard</li>
+                    </ul>
+                </div>
                 <MineField
                     game={this.state.game}
                     onLeftClick={(field: Mine) => this.onSquareLeftClick(field)}
