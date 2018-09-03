@@ -1,6 +1,6 @@
 import * as React from "react";
 import { MineSquare } from "./MineSquare";
-import { Game, Mine } from "../Game";
+import { Game, Mine } from "../domain";
 
 export class MineField extends React.Component<MineFieldProps> {
 
@@ -17,7 +17,7 @@ export class MineField extends React.Component<MineFieldProps> {
                                             <MineSquare key={`${i}-${j}`}
                                                         index={j + row.length}
                                                         field={field}
-                                                        position={{x: i, y: j}}
+                                                        position={{ x: i, y: j }}
                                                         onLeftClick={(field) => this.props.onLeftClick(field)}
                                                         onRightClick={(field) => this.props.onRightClick(field)}/>
                                         );

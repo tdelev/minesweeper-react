@@ -2,14 +2,15 @@ import * as React from 'react';
 import './App.css';
 
 import { MineField } from './components/MineField';
-import { checkCompleted, countFlagged, Game, Mine, newGame, onMark, onOpen } from './Game';
+import { game } from './game';
 import { Timer } from './components/Timer';
+import { Game, Mine } from './domain';
 
 class App extends React.Component<AppProps> {
     controlDown = false;
     startTime: Date;
     state = {
-        game: newGame(this.props.rows, this.props.columns),
+        game: game.newGame(this.props.rows, this.props.columns),
         completed: false,
         flagged: 0,
         elapsedSeconds: 0
@@ -45,23 +46,23 @@ class App extends React.Component<AppProps> {
     updateState(field: Mine, updateFn: (game: Game, field: Mine) => Game) {
         this.setState((prevState: any, props) => {
             const updatedGame = updateFn(prevState.game, field);
-            const completed = checkCompleted(updatedGame);
+            const completed = game.checkCompleted(updatedGame);
             if (completed || updatedGame.exploded) {
                 clearInterval(this.timer);
             }
             return {
                 game: updatedGame,
                 completed: completed,
-                flagged: countFlagged(updatedGame)
+                flagged: game.countFlagged(updatedGame)
             };
         });
     }
 
     public onSquareLeftClick(field: Mine) {
         if (this.controlDown) {
-            this.updateState(field, onOpen);
+            this.updateState(field, game.openMine);
         } else {
-            this.updateState(field, onMark);
+            this.updateState(field, game.markMine);
         }
     }
 

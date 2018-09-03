@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Mine } from "../Game";
+import { Mine, Point } from '../domain';
 
 export class MineSquare extends React.Component<MineProps> {
 
@@ -48,8 +48,5 @@ export interface MineProps {
     onRightClick: (field: Mine) => void;
 }
 
-export interface Point {
-    x: number;
-    y: number;
-}
+
 

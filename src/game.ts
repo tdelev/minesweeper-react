@@ -1,20 +1,15 @@
-import { Point } from "./components/MineSquare";
-
-export class Game {
-    constructor(public state: Array<Array<Mine>>, public totalBombs = 0, public exploded = false) {
-    }
-}
+import { Game, Mine } from './domain';
 
 const BOMBS_PROBABILITY = 0.15;
 
 const dx = [-1, 0, 1, -1, 1, -1, 0, 1];
 const dy = [-1, -1, -1, 0, 0, 1, 1, 1];
 
-export const newGame = function (rows: number, columns: number): Game {
+function newGame(rows: number, columns: number): Game {
     let totalBombs = 0;
     let estimatedBombs = Math.floor(rows * columns * BOMBS_PROBABILITY);
-    const state = Array(rows).fill(null).map((r, i: number) => {
-        return Array(columns).fill(null).map((c, j: number) => {
+    const state = Array(rows).fill(null).map((_, i: number) => {
+        return Array(columns).fill(null).map((_, j: number) => {
             const isBomb = Math.random() < BOMBS_PROBABILITY;
             if (isBomb && totalBombs < estimatedBombs) {
                 totalBombs += 1;
@@ -27,21 +22,24 @@ export const newGame = function (rows: number, columns: number): Game {
     if (totalBombs < estimatedBombs) {
         return newGame(rows, columns);
     }
-    state.forEach((row, i) => {
-        row.forEach((mine, j) => {
+    fillBombsCount(state);
+    return new Game(state, totalBombs);
+}
+
+function fillBombsCount(state: Array<Array<Mine>>) {
+    state.forEach((row, _) => {
+        row.forEach((mine, _) => {
             if (isMine(mine)) {
-                mine.bombs = -1;
-                traverseNeighbours(state, mine, nf => {
-                    if (!isMine(nf)) {
-                        nf.bombs += 1;
+                traverseNeighbours(state, mine, mineNeighbour => {
+                    if (!isMine(mineNeighbour)) {
+                        mineNeighbour.bombs += 1;
                     }
-                    return nf;
+                    return mineNeighbour;
                 });
             }
         });
     });
-    return new Game(state, totalBombs);
-};
+}
 
 function endGame(game: Game): Game {
     return update(game, (field) => {
@@ -53,7 +51,7 @@ function endGame(game: Game): Game {
     }, true);
 }
 
-export const onOpen = function (game: Game, field: Mine): Game {
+function openMine(game: Game, field: Mine): Game {
     if (field.isFlagged) return game;
     else if (isMine(field)) {
         return endGame(game);
@@ -71,10 +69,10 @@ export const onOpen = function (game: Game, field: Mine): Game {
         }
         return result;
     }
-};
+}
 
-export const onMark = function (game: Game, opened: Mine): Game {
-    if (opened.isOpened && !opened.isFlagged) return onExplore(game, opened);
+function markMine(game: Game, opened: Mine): Game {
+    if (opened.isOpened && !opened.isFlagged) return exploreMine(game, opened);
     return update(game, (field: Mine) => {
         if (field == opened) {
             return new Mine(field.position, false, field.bombs, !field.isFlagged);
@@ -82,9 +80,9 @@ export const onMark = function (game: Game, opened: Mine): Game {
             return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
         }
     });
-};
+}
 
-const onExplore = function (game: Game, opened: Mine): Game {
+function exploreMine(game: Game, opened: Mine): Game {
     const updated = update(game, (field: Mine) => field);
     let hitMine = false;
     traverseNeighbours(updated.state, opened, field => {
@@ -104,7 +102,7 @@ const onExplore = function (game: Game, opened: Mine): Game {
         return endGame(game);
     }
     return updated;
-};
+}
 
 function traverseNeighbours(fields: Array<Array<Mine>>, startMine: Mine, onField: (field: Mine) => Mine) {
     const start = startMine.position;
@@ -142,7 +140,7 @@ function update(game: Game, f: ((b: Mine) => Mine), exploded = false): Game {
     return new Game(updated, game.totalBombs, game.exploded || exploded);
 }
 
-function isMineCovered(field: Mine) {
+function isMineProcessed(field: Mine) {
     if (isMine(field)) {
         return field.isFlagged;
     } else {
@@ -150,34 +148,35 @@ function isMineCovered(field: Mine) {
     }
 }
 
-export const checkCompleted = function (game: Game): boolean {
+function checkCompleted(game: Game): boolean {
     const and = (a: boolean, b: boolean) => a && b;
     return game.state.map(row => {
         return row.map(field => {
-            return isMineCovered(field);
+            return isMineProcessed(field);
         }).reduce(and);
     }).reduce(and);
-};
+}
 
-export const countFlagged = function (game: Game): number {
+function countFlagged(game: Game): number {
     const plus = (a: number, b: number) => a + b;
     return game.state.map(row => {
         return row.map(field => {
             return field.isFlagged ? 1 : 0;
         }).reduce(plus, 0);
     }).reduce(plus, 0);
-};
-
-export class Mine {
-    constructor(
-        public position: Point,
-        public isOpened = false,
-        public bombs = 0,
-        public isFlagged = false,
-    ) {
-    }
 }
+
 
 function isMine(mine: Mine) {
     return mine.bombs === -1;
 }
+
+export const game = {
+    newGame: newGame,
+    fillBombsCount: fillBombsCount,
+    countFlagged: countFlagged,
+    checkCompleted: checkCompleted,
+    markMine: markMine,
+    openMine: openMine,
+    BOMBS_PROBABILITY: BOMBS_PROBABILITY
+};
