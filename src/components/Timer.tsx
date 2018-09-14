@@ -10,7 +10,6 @@ export class Timer extends React.Component<TimerProps> {
     }
 }
 
-
 export interface TimerProps {
     elapsedSeconds: number;
 }

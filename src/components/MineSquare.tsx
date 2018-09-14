@@ -1,12 +1,7 @@
 import * as React from "react";
-import { Mine, Point } from '../domain';
+import { Mine } from '../domain';
 
 export class MineSquare extends React.Component<MineProps> {
-
-    onRightClick(e: React.MouseEvent<HTMLButtonElement>) {
-        this.props.onRightClick(this.props.field);
-        e.preventDefault();
-    }
 
     renderField(field: Mine) {
         if (field.isOpened) {
@@ -29,23 +24,19 @@ export class MineSquare extends React.Component<MineProps> {
     render() {
         const field = this.props.field;
         return (
-            <button className={field.isOpened ? ['mine-button', 'mine-opened'].join(' ') : 'mine-button'}
+            <button className={'mine-button' + (field.isOpened ? '' : ' mine-opened')}
                     tabIndex={this.props.index}
-                    onClick={() => this.props.onLeftClick(this.props.field)}
-                    onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => this.onRightClick(e)}>
+                    onClick={() => this.props.onLeftClick(field)}>
                 {this.renderField(field)}
             </button>
         );
     }
 }
 
-
 export interface MineProps {
     index: number;
-    position: Point;
     field: Mine;
     onLeftClick: (field: Mine) => void;
-    onRightClick: (field: Mine) => void;
 }
 
 

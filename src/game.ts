@@ -166,7 +166,6 @@ function countFlagged(game: Game): number {
     }).reduce(plus, 0);
 }
 
-
 function isMine(mine: Mine) {
     return mine.bombs === -1;
 }

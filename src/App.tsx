@@ -72,10 +72,6 @@ class App extends React.Component<AppProps> {
         }
     }
 
-    public onSquareRightClick(field: Mine) {
-        //this.updateState(field, onMark);
-    }
-
     startGame(rows: number, columns: number) {
         clearInterval(this.timer);
         this.startTimer();
@@ -101,8 +97,7 @@ class App extends React.Component<AppProps> {
                 </div>
                 <MineField
                     game={this.state.game}
-                    onLeftClick={(field: Mine) => this.onSquareLeftClick(field)}
-                    onRightClick={(field: Mine) => this.onSquareRightClick(field)}/>
+                    onLeftClick={(field: Mine) => this.onSquareLeftClick(field)}/>
                 <Timer elapsedSeconds={this.state.elapsedSeconds}/>
                 <div className='status'>Completed: {this.state.completed ? 'YES' : 'NO'}</div>
                 <div className='status'>{this.state.flagged}/{this.state.game.totalBombs}</div>

@@ -17,24 +17,20 @@ export class MineField extends React.Component<MineFieldProps> {
                                             <MineSquare key={`${i}-${j}`}
                                                         index={j + row.length}
                                                         field={field}
-                                                        position={{ x: i, y: j }}
-                                                        onLeftClick={(field) => this.props.onLeftClick(field)}
-                                                        onRightClick={(field) => this.props.onRightClick(field)}/>
+                                                        onLeftClick={(field) => this.props.onLeftClick(field)}/>
                                         );
                                     })
                                 }
                             </div>
-                        )
+                        );
                     })
                 }
             </div>
-        )
+        );
     }
 }
-
 
 export interface MineFieldProps {
     game: Game;
     onLeftClick: (field: Mine) => void;
-    onRightClick: (field: Mine) => void;
 }
