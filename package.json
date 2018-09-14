@@ -1,5 +1,6 @@
 {
   "name": "minesweeper-react",
+  "homepage": "https://delev.me/minesweeper-react",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
