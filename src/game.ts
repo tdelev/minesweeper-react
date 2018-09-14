@@ -88,8 +88,30 @@ function openMine(game: Game, field: Mine): Game {
     }
 }
 
+function exploreMine(game: Game, opened: Mine): Game {
+    const updated = update(game, (field: Mine) => field);
+    let hitMine = false;
+    traverseNeighbours(updated.state, opened, field => {
+        if (!field.isOpened && !field.isFlagged) {
+            if (isMine(field)) {
+                hitMine = true;
+            } else {
+                field.isOpened = true;
+                if (field.mines == 0) {
+                    updateZeros(updated.state, field);
+                }
+            }
+        }
+        return field;
+    });
+    if (hitMine) {
+        return endGame(game);
+    }
+    return updated;
+}
+
 function markMine(game: Game, opened: Mine): Game {
-    if (opened.isOpened && !opened.isFlagged) return openMine(game, opened);
+    if (opened.isOpened && !opened.isFlagged) return exploreMine(game, opened);
     return update(game, (field: Mine) => {
         if (field == opened) {
             return new Mine(field.position, false, field.mines, !field.isFlagged);
