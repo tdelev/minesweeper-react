@@ -5,9 +5,9 @@ export class MineSquare extends React.Component<MineProps> {
 
     renderField(field: Mine) {
         if (field.isOpened) {
-            if (field.bombs > 0) {
-                return (<span className={`bombs-${field.bombs}`}>{field.bombs}</span>);
-            } else if (field.bombs == 0) {
+            if (field.mines > 0) {
+                return (<span className={`bombs-${field.mines}`}>{field.mines}</span>);
+            } else if (field.mines == 0) {
                 return ''
             } else {
                 return (<i className='fas fa-xs fa-bomb bomb'/>);

@@ -6,35 +6,52 @@ const dx = [-1, 0, 1, -1, 1, -1, 0, 1];
 const dy = [-1, -1, -1, 0, 0, 1, 1, 1];
 
 function newGame(rows: number, columns: number): Game {
-    let totalBombs = 0;
-    let estimatedBombs = Math.floor(rows * columns * BOMBS_PROBABILITY);
-    const state = Array(rows).fill(null).map((_, i: number) => {
-        return Array(columns).fill(null).map((_, j: number) => {
-            const isBomb = Math.random() < BOMBS_PROBABILITY;
-            if (isBomb && totalBombs < estimatedBombs) {
-                totalBombs += 1;
-                return new Mine({ x: i, y: j }, false, -1, false);
+    let totalMines = 0;
+    let estimatedMines = Math.floor(rows * columns * BOMBS_PROBABILITY);
+    const state = Array(rows).fill(null).map((r, i: number) => {
+        return Array(columns).fill(null).map((c, j: number) => {
+            const isMine = Math.random() < BOMBS_PROBABILITY;
+            if (isMine) {
+                totalMines += 1;
+                return new Mine({x: i, y: j}, false, -1, false);
             } else {
-                return new Mine({ x: i, y: j }, false, 0, false);
+                return new Mine({x: i, y: j}, false, 0, false);
             }
         });
     });
-    if (totalBombs < estimatedBombs) {
-        return newGame(rows, columns);
+    while (totalMines < estimatedMines) {
+        const randX = Math.floor(Math.random() * rows);
+        const randY = Math.floor(Math.random() * columns);
+        if (!isMine(state[randX][randY])) {
+            ++totalMines;
+            state[randX][randY].mines = -1;
+        }
+    }
+    if (totalMines > estimatedMines) {
+        const mines = state.map(row => row.filter(mine => !isMine(mine)))
+            .reduce((prev, current) => prev.concat(current));
+
+        while (totalMines > estimatedMines) {
+            const randMineIndex = Math.floor(Math.random() * mines.length);
+            mines[randMineIndex].mines = 0;
+            --totalMines;
+        }
     }
     fillBombsCount(state);
-    return new Game(state, totalBombs);
+
+    return new Game(state, totalMines);
 }
 
 function fillBombsCount(state: Array<Array<Mine>>) {
-    state.forEach((row, _) => {
-        row.forEach((mine, _) => {
+    state.forEach((row, i) => {
+        row.forEach((mine, j) => {
             if (isMine(mine)) {
-                traverseNeighbours(state, mine, mineNeighbour => {
-                    if (!isMine(mineNeighbour)) {
-                        mineNeighbour.bombs += 1;
+                mine.mines = -1;
+                traverseNeighbours(state, mine, nf => {
+                    if (!isMine(nf)) {
+                        nf.mines += 1;
                     }
-                    return mineNeighbour;
+                    return nf;
                 });
             }
         });
@@ -44,9 +61,9 @@ function fillBombsCount(state: Array<Array<Mine>>) {
 function endGame(game: Game): Game {
     return update(game, (field) => {
         if (isMine(field)) {
-            return new Mine(field.position, true, field.bombs, field.isFlagged);
+            return new Mine(field.position, true, field.mines, field.isFlagged);
         } else {
-            return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
+            return new Mine(field.position, field.isOpened, field.mines, field.isFlagged);
         }
     }, true);
 }
@@ -58,13 +75,13 @@ function openMine(game: Game, field: Mine): Game {
     } else {
         const openField = (openedField: Mine) => (field: Mine) => {
             if (field === openedField) {
-                return new Mine(field.position, true, field.bombs, false);
+                return new Mine(field.position, true, field.mines, false);
             } else {
-                return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
+                return new Mine(field.position, field.isOpened, field.mines, field.isFlagged);
             }
         };
         let result = update(game, openField(field));
-        if (field.bombs == 0) {
+        if (field.mines == 0) {
             updateZeros(result.state, field);
         }
         return result;
@@ -72,36 +89,14 @@ function openMine(game: Game, field: Mine): Game {
 }
 
 function markMine(game: Game, opened: Mine): Game {
-    if (opened.isOpened && !opened.isFlagged) return exploreMine(game, opened);
+    if (opened.isOpened && !opened.isFlagged) return openMine(game, opened);
     return update(game, (field: Mine) => {
         if (field == opened) {
-            return new Mine(field.position, false, field.bombs, !field.isFlagged);
+            return new Mine(field.position, false, field.mines, !field.isFlagged);
         } else {
-            return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
+            return new Mine(field.position, field.isOpened, field.mines, field.isFlagged);
         }
     });
-}
-
-function exploreMine(game: Game, opened: Mine): Game {
-    const updated = update(game, (field: Mine) => field);
-    let hitMine = false;
-    traverseNeighbours(updated.state, opened, field => {
-        if (!field.isOpened && !field.isFlagged) {
-            if (isMine(field)) {
-                hitMine = true;
-            } else {
-                field.isOpened = true;
-                if (field.bombs == 0) {
-                    updateZeros(updated.state, field);
-                }
-            }
-        }
-        return field;
-    });
-    if (hitMine) {
-        return endGame(game);
-    }
-    return updated;
 }
 
 function traverseNeighbours(fields: Array<Array<Mine>>, startMine: Mine, onField: (field: Mine) => Mine) {
@@ -123,7 +118,7 @@ function updateZeros(fields: Array<Array<Mine>>, start: Mine) {
     traverseNeighbours(fields, start, (field => {
         if (!field.isOpened && !isMine(field)) {
             field.isOpened = true;
-            if (field.bombs == 0) {
+            if (field.mines == 0) {
                 updateZeros(fields, field);
             }
         }
@@ -140,7 +135,7 @@ function update(game: Game, f: ((b: Mine) => Mine), exploded = false): Game {
     return new Game(updated, game.totalBombs, game.exploded || exploded);
 }
 
-function isMineProcessed(field: Mine) {
+function isMineCovered(field: Mine) {
     if (isMine(field)) {
         return field.isFlagged;
     } else {
@@ -152,7 +147,7 @@ function checkCompleted(game: Game): boolean {
     const and = (a: boolean, b: boolean) => a && b;
     return game.state.map(row => {
         return row.map(field => {
-            return isMineProcessed(field);
+            return isMineCovered(field);
         }).reduce(and);
     }).reduce(and);
 }
@@ -167,7 +162,7 @@ function countFlagged(game: Game): number {
 }
 
 function isMine(mine: Mine) {
-    return mine.bombs === -1;
+    return mine.mines === -1;
 }
 
 export const game = {
