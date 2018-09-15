@@ -1,4 +1,4 @@
-import { Game, Mine } from './domain';
+import { Game, Mine, Point } from './domain';
 
 const BOMBS_PROBABILITY = 0.15;
 
@@ -24,7 +24,7 @@ function newGame(rows: number, columns: number): Game {
         const randY = Math.floor(Math.random() * columns);
         if (!isMine(state[randX][randY])) {
             ++totalMines;
-            state[randX][randY].mines = -1;
+            state[randX][randY].bombs = -1;
         }
     }
     if (totalMines > estimatedMines) {
@@ -33,7 +33,7 @@ function newGame(rows: number, columns: number): Game {
 
         while (totalMines > estimatedMines) {
             const randMineIndex = Math.floor(Math.random() * mines.length);
-            mines[randMineIndex].mines = 0;
+            mines[randMineIndex].bombs = 0;
             --totalMines;
         }
     }
@@ -46,10 +46,10 @@ function fillBombsCount(state: Array<Array<Mine>>) {
     state.forEach((row, i) => {
         row.forEach((mine, j) => {
             if (isMine(mine)) {
-                mine.mines = -1;
+                mine.bombs = -1;
                 traverseNeighbours(state, mine, nf => {
                     if (!isMine(nf)) {
-                        nf.mines += 1;
+                        nf.bombs += 1;
                     }
                     return nf;
                 });
@@ -61,9 +61,9 @@ function fillBombsCount(state: Array<Array<Mine>>) {
 function endGame(game: Game): Game {
     return update(game, (field) => {
         if (isMine(field)) {
-            return new Mine(field.position, true, field.mines, field.isFlagged);
+            return new Mine(field.position, true, field.bombs, field.isFlagged);
         } else {
-            return new Mine(field.position, field.isOpened, field.mines, field.isFlagged);
+            return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
         }
     }, true);
 }
@@ -75,20 +75,20 @@ function openMine(game: Game, field: Mine): Game {
     } else {
         const openField = (openedField: Mine) => (field: Mine) => {
             if (field === openedField) {
-                return new Mine(field.position, true, field.mines, false);
+                return new Mine(field.position, true, field.bombs, false);
             } else {
-                return new Mine(field.position, field.isOpened, field.mines, field.isFlagged);
+                return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
             }
         };
         let result = update(game, openField(field));
-        if (field.mines == 0) {
+        if (field.bombs == 0) {
             updateZeros(result.state, field);
         }
         return result;
     }
 }
 
-function exploreMine(game: Game, opened: Mine): Game {
+function exploreOpenedField(game: Game, opened: Mine): Game {
     const updated = update(game, (field: Mine) => field);
     let hitMine = false;
     traverseNeighbours(updated.state, opened, field => {
@@ -97,7 +97,7 @@ function exploreMine(game: Game, opened: Mine): Game {
                 hitMine = true;
             } else {
                 field.isOpened = true;
-                if (field.mines == 0) {
+                if (field.bombs == 0) {
                     updateZeros(updated.state, field);
                 }
             }
@@ -111,22 +111,24 @@ function exploreMine(game: Game, opened: Mine): Game {
 }
 
 function markMine(game: Game, opened: Mine): Game {
-    if (opened.isOpened && !opened.isFlagged) return exploreMine(game, opened);
+    if (opened.isOpened && !opened.isFlagged) return exploreOpenedField(game, opened);
     return update(game, (field: Mine) => {
         if (field == opened) {
-            return new Mine(field.position, false, field.mines, !field.isFlagged);
+            return new Mine(field.position, false, field.bombs, !field.isFlagged);
         } else {
-            return new Mine(field.position, field.isOpened, field.mines, field.isFlagged);
+            return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
         }
     });
 }
 
 function traverseNeighbours(fields: Array<Array<Mine>>, startMine: Mine, onField: (field: Mine) => Mine) {
+    let inBounds = (point: Point) => point.x >= 0 && point.x < fields.length &&
+        point.y >= 0 && point.y < fields[0].length;
     const start = startMine.position;
-    dx.map((x, i) => [x, dy[i]])
-        .map(deltas => [start.x + deltas[0], start.y + deltas[1]])
-        .filter(indexes => indexes[0] >= 0 && indexes[0] < fields.length && indexes[1] >= 0 && indexes[1] < fields[0].length)
-        .map(indexes => onField(fields[indexes[0]][indexes[1]]));
+    dx.map((x, i) => ({dx: x, dy: dy[i]}))
+        .map(deltas => ({x: start.x + deltas.dx, y: start.y + deltas.dy}))
+        .filter((point: Point) => inBounds(point))
+        .map((point: Point) => onField(fields[point.x][point.y]));
     /*for (let i = 0; i < dx.length; ++i) {
         let ii = start.x + dx[i];
         let jj = start.y + dy[i];
@@ -140,7 +142,7 @@ function updateZeros(fields: Array<Array<Mine>>, start: Mine) {
     traverseNeighbours(fields, start, (field => {
         if (!field.isOpened && !isMine(field)) {
             field.isOpened = true;
-            if (field.mines == 0) {
+            if (field.bombs == 0) {
                 updateZeros(fields, field);
             }
         }
@@ -184,7 +186,7 @@ function countFlagged(game: Game): number {
 }
 
 function isMine(mine: Mine) {
-    return mine.mines === -1;
+    return mine.bombs === -1;
 }
 
 export const game = {

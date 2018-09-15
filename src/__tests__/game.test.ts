@@ -9,73 +9,73 @@ test('create new game', () => {
 });
 
 
-test('fill mines count 2x1', () => {
+test('fill bombs count 2x1', () => {
     const state = [[
         {
-            "position": { x: 0, y: 0 },
+            "position": {x: 0, y: 0},
             "isOpened": false,
-            "mines": -1,
+            "bombs": -1,
             "isFlagged": true
         },
         {
-            "position": { x: 0, y: 1 },
+            "position": {x: 0, y: 1},
             "isOpened": true,
-            "mines": 0,
+            "bombs": 0,
             "isFlagged": false
         }
     ]];
 
     game.fillBombsCount(state);
-    expect(state[0][1].mines).toBe(1);
+    expect(state[0][1].bombs).toBe(1);
 });
 
-test('fill mines count 2x2', () => {
+test('fill bombs count 2x2', () => {
     const state = [[
         {
-            "position": { x: 0, y: 0 },
+            "position": {x: 0, y: 0},
             "isOpened": false,
-            "mines": -1,
+            "bombs": -1,
             "isFlagged": true
         },
         {
-            "position": { x: 0, y: 1 },
+            "position": {x: 0, y: 1},
             "isOpened": true,
-            "mines": 0,
+            "bombs": 0,
             "isFlagged": false
         }
     ], [
         {
-            "position": { x: 1, y: 0 },
+            "position": {x: 1, y: 0},
             "isOpened": false,
-            "mines": -1,
+            "bombs": -1,
             "isFlagged": true
         },
         {
-            "position": { x: 1, y: 1 },
+            "position": {x: 1, y: 1},
             "isOpened": true,
-            "mines": 0,
+            "bombs": 0,
             "isFlagged": false
         }
     ]];
 
     game.fillBombsCount(state);
-    expect(state[0][1].mines).toBe(2);
-    expect(state[1][1].mines).toBe(2);
+    expect(state[0][1].bombs).toBe(2);
+    expect(state[1][1].bombs).toBe(2);
 });
 
 test('game is completed', () => {
     const givenGame = {
         "state": [[
             {
-                "position": { x: 0, y: 0 },
+                "position": {x: 0, y: 0},
                 "isOpened": false,
-                "mines": -1,
+                "bombs": -1,
                 "isFlagged": true
             },
             {
-                "position": { x: 0, y: 1 },
+                "position": {x: 0, y: 1},
                 "isOpened": true,
-                "mines": 1,
+                "bombs": 1,
                 "isFlagged": false
             }
         ]],
@@ -90,24 +90,24 @@ test('game is completed', () => {
 test('two bomb game is completed', () => {
     const givenGame = {
         "state": [[{
-            "position": { x: 0, y: 0 },
+            "position": {x: 0, y: 0},
             "isOpened": false,
-            "mines": -1,
+            "bombs": -1,
             "isFlagged": true
         }, {
-            "position": { x: 0, y: 1 },
+            "position": {x: 0, y: 1},
             "isOpened": true,
-            "mines": 1,
+            "bombs": 1,
             "isFlagged": false
         }], [{
-            "position": { x: 1, y: 0 },
+            "position": {x: 1, y: 0},
             "isOpened": true,
-            "mines": 2,
+            "bombs": 2,
             "isFlagged": true
         }, {
-            "position": { x: 1, y: 1 },
+            "position": {x: 1, y: 1},
             "isOpened": false,
-            "mines": -1,
+            "bombs": -1,
             "isFlagged": true
         }]],
         "exploded": false,

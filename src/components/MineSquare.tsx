@@ -1,35 +1,32 @@
 import * as React from "react";
 import { Mine } from '../domain';
 
-export class MineSquare extends React.Component<MineProps> {
+export const MineSquare = (props: MineProps) => {
+    const field = props.field;
+    return (
+        <button className={'mine-button' + (field.isOpened ? '' : ' mine-opened')}
+                tabIndex={props.index}
+                onClick={() => props.onLeftClick(field)}>
+            {renderField(field)}
+        </button>
+    );
+};
 
-    renderField(field: Mine) {
-        if (field.isOpened) {
-            if (field.mines > 0) {
-                return (<span className={`bombs-${field.mines}`}>{field.mines}</span>);
-            } else if (field.mines == 0) {
-                return ''
-            } else {
-                return (<i className='fas fa-xs fa-bomb bomb'/>);
-            }
+function renderField(field: Mine) {
+    if (field.isOpened) {
+        if (field.bombs > 0) {
+            return (<span className={`bombs-${field.bombs}`}>{field.bombs}</span>);
+        } else if (field.bombs == 0) {
+            return ''
         } else {
-            if (field.isFlagged) {
-                return (<i className='fas fa-xs fa-flag'/>);
-            } else {
-                return '';
-            }
+            return (<i className='fas fa-xs fa-bomb bomb'/>);
         }
-    }
-
-    render() {
-        const field = this.props.field;
-        return (
-            <button className={'mine-button' + (field.isOpened ? '' : ' mine-opened')}
-                    tabIndex={this.props.index}
-                    onClick={() => this.props.onLeftClick(field)}>
-                {this.renderField(field)}
-            </button>
-        );
+    } else {
+        if (field.isFlagged) {
+            return (<i className='fas fa-xs fa-flag'/>);
+        } else {
+            return '';
+        }
     }
 }
 
@@ -38,6 +35,3 @@ export interface MineProps {
     field: Mine;
     onLeftClick: (field: Mine) => void;
 }
-
-
-

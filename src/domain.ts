@@ -4,13 +4,13 @@ export interface Point {
 }
 
 /**
- * mines = -1 - it is a bomb
- * mines >= 0 - count of mines around
+ * bombs = -1 - it is a bomb
+ * bombs >= 0 - count of bombs around
  */
 export class Mine {
     constructor(public position: Point,
                 public isOpened = false,
-                public mines = 0,
+                public bombs = 0,
                 public isFlagged = false,
     ) {
     }
