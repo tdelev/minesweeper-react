@@ -28,13 +28,15 @@ function newGame(rows: number, columns: number): Game {
         }
     }
     if (totalMines > estimatedMines) {
-        const mines = state.map(row => row.filter(mine => !isMine(mine)))
+        const mines = state.map(row => row.filter(mine => isMine(mine)))
             .reduce((prev, current) => prev.concat(current));
 
         while (totalMines > estimatedMines) {
             const randMineIndex = Math.floor(Math.random() * mines.length);
-            mines[randMineIndex].bombs = 0;
-            --totalMines;
+            if (isMine(mines[randMineIndex])) {
+                mines[randMineIndex].bombs = 0;
+                --totalMines;
+            }
         }
     }
     fillBombsCount(state);
