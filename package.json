@@ -10,7 +10,7 @@
     "jest": "^23.5.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
-    "react-scripts-ts": "2.17.0",
+    "react-scripts-ts": "4.0.8",
     "ts-jest": "^23.1.3",
     "typescript": "^3.0.1"
   },
