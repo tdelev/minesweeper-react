@@ -34,14 +34,14 @@ function updateURL(difficulty: Difficulty) {
 function App() {
   const initialDifficulty = getDifficultyFromURL();
   const initialConfig = DIFFICULTY_CONFIG[initialDifficulty];
-  
+
   const [game, setGame] = useState<Game>(() => gameEngine.newGame(initialConfig.rows, initialConfig.columns));
   const [completed, setCompleted] = useState(false);
   const [flaggedCount, setFlaggedCount] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [controlDown, setControlDown] = useState(false);
   const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty>(initialDifficulty);
-  
+
   const startTimeRef = useRef<Date>(new Date());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -130,9 +130,13 @@ function App() {
   }, [startTimer, stopTimer]);
 
   const getGameStatus = () => {
-    if (completed) return { message: '🎉 Victory! All mines cleared!', className: 'win' };
-    if (game.exploded) return { message: '💥 Game Over! You hit a mine!', className: 'lose' };
-    return null;
+    if (completed) {
+      return { message: '🎉 Victory! All mines cleared!', className: 'win' };
+    } else if (game.exploded) {
+      return { message: '💥 Game Over! You hit a mine!', className: 'lose' };
+    } else {
+      return null;
+    }
   };
 
   const status = getGameStatus();
@@ -140,7 +144,7 @@ function App() {
   return (
     <div className="game-container">
       <ThemeToggle />
-      
+
       <header className="game-header">
         <h1 className="game-title">Minesweeper</h1>
         <p className="game-subtitle">Cyberpunk Edition</p>
@@ -149,24 +153,24 @@ function App() {
       <nav className="game-menu">
         <ul className="level-selector">
           <li>
-            <button 
-              className={`level-button ${currentDifficulty === 'Easy' ? 'active' : ''}`} 
+            <button
+              className={`level-button ${currentDifficulty === 'Easy' ? 'active' : ''}`}
               onClick={() => startGame('Easy')}
             >
               Easy
             </button>
           </li>
           <li>
-            <button 
-              className={`level-button ${currentDifficulty === 'Medium' ? 'active' : ''}`} 
+            <button
+              className={`level-button ${currentDifficulty === 'Medium' ? 'active' : ''}`}
               onClick={() => startGame('Medium')}
             >
               Medium
             </button>
           </li>
           <li>
-            <button 
-              className={`level-button ${currentDifficulty === 'Hard' ? 'active' : ''}`} 
+            <button
+              className={`level-button ${currentDifficulty === 'Hard' ? 'active' : ''}`}
               onClick={() => startGame('Hard')}
             >
               Hard
@@ -176,14 +180,14 @@ function App() {
       </nav>
 
       <main className="game-board-container">
-        <StatusDashboard 
+        <StatusDashboard
           flaggedCount={flaggedCount}
           totalBombs={game.totalBombs}
           elapsedSeconds={elapsedSeconds}
           completed={completed}
           exploded={game.exploded}
         />
-        
+
         <MineField
           game={game}
           onLeftClick={onSquareLeftClick}

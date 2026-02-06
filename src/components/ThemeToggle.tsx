@@ -6,10 +6,10 @@ export const ThemeToggle = () => {
   const [theme, setTheme] = useState<Theme>(() => {
     // Check for saved theme preference or system preference
     const saved = localStorage.getItem('theme') as Theme;
-    if (saved) return saved;
-    
-    // Check system preference
-    if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+    if (saved) {
+      return saved;
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      // Check system preference
       return 'light';
     }
     return 'dark';
@@ -26,8 +26,8 @@ export const ThemeToggle = () => {
   };
 
   return (
-    <button 
-      className="theme-toggle" 
+    <button
+      className="theme-toggle"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >

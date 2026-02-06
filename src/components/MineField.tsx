@@ -8,8 +8,6 @@ export interface MineFieldProps {
 }
 
 export const MineField = ({ game, onLeftClick, onExploreNeighbors }: MineFieldProps) => {
-  const gameOver = game.exploded;
-
   return (
     <div className="game-board">
       {game.state.map((row, rowIndex) => (
@@ -21,7 +19,7 @@ export const MineField = ({ game, onLeftClick, onExploreNeighbors }: MineFieldPr
               field={field}
               onLeftClick={onLeftClick}
               onExploreNeighbors={onExploreNeighbors}
-              gameOver={gameOver}
+              gameOver={game.exploded}
             />
           ))}
         </div>

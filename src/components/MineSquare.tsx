@@ -1,5 +1,4 @@
 import { Mine } from '../domain';
-import { useState, useEffect } from 'react';
 
 export interface MineSquareProps {
   index: number;
@@ -12,8 +11,9 @@ export interface MineSquareProps {
 function getNumberColorClass(bombs: number): string {
   if (bombs >= 1 && bombs <= 8) {
     return `mine-count-${bombs}`;
+  } else {
+    return '';
   }
-  return '';
 }
 
 function renderFieldContent(field: Mine) {
@@ -39,22 +39,13 @@ function renderFieldContent(field: Mine) {
 }
 
 export const MineSquare = ({ index, field, onLeftClick, onExploreNeighbors, gameOver }: MineSquareProps) => {
-  const [isFlagged, setIsFlagged] = useState(field.isFlagged);
-  const [isRevealed, setIsRevealed] = useState(field.isOpened);
-
-  // Sync with field state when it changes externally
-  useEffect(() => {
-    setIsFlagged(field.isFlagged);
-    setIsRevealed(field.isOpened);
-  }, [field.isFlagged, field.isOpened]);
-
   const handleClick = () => {
-    if (gameOver) return;
-    
-    // If field is revealed and has a number, explore neighbors
-    if (isRevealed && field.bombs > 0) {
+    if (gameOver) {
+      return;
+    } else if (field.isOpened && field.bombs > 0) {
+      // If field is revealed and has a number, explore neighbors
       onExploreNeighbors(field);
-    } else if (!isRevealed) {
+    } else if (!field.isOpened) {
       // Normal click on hidden field
       onLeftClick(field);
     }
@@ -62,9 +53,15 @@ export const MineSquare = ({ index, field, onLeftClick, onExploreNeighbors, game
 
   const getClassNames = () => {
     const classes = ['mine-square'];
-    if (isRevealed) classes.push('revealed');
-    if (isFlagged) classes.push('flagged');
-    if (field.bombs === -1 && isRevealed) classes.push('exploded');
+    if (field.isOpened) {
+      classes.push('revealed');
+    }
+    if (field.isFlagged) {
+      classes.push('flagged');
+    }
+    if (field.bombs === -1 && field.isOpened) {
+      classes.push('exploded');
+    }
     return classes.join(' ');
   };
 
@@ -74,9 +71,9 @@ export const MineSquare = ({ index, field, onLeftClick, onExploreNeighbors, game
       tabIndex={index}
       onClick={handleClick}
       role="button"
-      aria-label={isRevealed 
+      aria-label={field.isOpened
         ? field.bombs === -1 ? 'Bomb' : `${field.bombs} adjacent mines`
-        : isFlagged ? 'Flagged' : 'Hidden'
+        : field.isFlagged ? 'Flagged' : 'Hidden'
       }
       aria-disabled={gameOver}
     >
