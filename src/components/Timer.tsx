@@ -1,11 +1,9 @@
-import * as React from "react";
 import { time } from '../timer';
 
-export const Timer = (props: TimerProps) => (
-    <h3>{time.secondsToString(props.elapsedSeconds)}</h3>
-);
-
 export interface TimerProps {
-    elapsedSeconds: number;
+  elapsedSeconds: number;
 }
 
+export const Timer = ({ elapsedSeconds }: TimerProps) => (
+  <h3>{time.secondsToString(elapsedSeconds)}</h3>
+);

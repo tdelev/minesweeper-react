@@ -1,11 +1,16 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
-import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(
-  <App rows={12} columns={16} />,
-  document.getElementById('root') as HTMLElement
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+const root = createRoot(rootElement);
+root.render(
+  <StrictMode>
+    <App rows={12} columns={16} />
+  </StrictMode>
 );
-registerServiceWorker();

@@ -1,10 +1,11 @@
 import { game } from "../game";
+import { test, expect } from 'vitest';
 
 test('create new game', () => {
     const rows = 5;
     const columns = 5;
     const theGame = game.newGame(5, 5);
-    let estimatedBombs = Math.floor(rows * columns * game.BOMBS_PROBABILITY);
+    const estimatedBombs = Math.floor(rows * columns * game.BOMBS_PROBABILITY);
     expect(theGame.totalBombs).toBeGreaterThanOrEqual(estimatedBombs);
 });
 

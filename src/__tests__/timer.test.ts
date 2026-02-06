@@ -1,4 +1,5 @@
 import { time } from '../timer';
+import { test, expect } from 'vitest';
 
 test('5 seconds is 0:05', () => {
     const actual = time.secondsToString(5);

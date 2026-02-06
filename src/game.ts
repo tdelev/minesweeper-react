@@ -7,9 +7,9 @@ const dy = [-1, -1, -1, 0, 0, 1, 1, 1];
 
 function newGame(rows: number, columns: number): Game {
     let totalMines = 0;
-    let estimatedMines = Math.floor(rows * columns * BOMBS_PROBABILITY);
-    const state = Array(rows).fill(null).map((r, i: number) => {
-        return Array(columns).fill(null).map((c, j: number) => {
+    const estimatedMines = Math.floor(rows * columns * BOMBS_PROBABILITY);
+    const state = Array(rows).fill(null).map((_, i: number) => {
+        return Array(columns).fill(null).map((__, j: number) => {
             const isMine = Math.random() < BOMBS_PROBABILITY;
             if (isMine) {
                 totalMines += 1;
@@ -45,8 +45,8 @@ function newGame(rows: number, columns: number): Game {
 }
 
 function fillBombsCount(state: Array<Array<Mine>>) {
-    state.forEach((row, i) => {
-        row.forEach((mine, j) => {
+    state.forEach((row) => {
+        row.forEach((mine) => {
             if (isMine(mine)) {
                 mine.bombs = -1;
                 traverseNeighbours(state, mine, nf => {
@@ -82,7 +82,7 @@ function openMine(game: Game, field: Mine): Game {
                 return new Mine(field.position, field.isOpened, field.bombs, field.isFlagged);
             }
         };
-        let result = update(game, openField(field));
+        const result = update(game, openField(field));
         if (field.bombs == 0) {
             updateZeros(result.state, field);
         }
@@ -124,7 +124,7 @@ function markMine(game: Game, opened: Mine): Game {
 }
 
 function traverseNeighbours(fields: Array<Array<Mine>>, startMine: Mine, onField: (field: Mine) => Mine) {
-    let inBounds = (point: Point) => point.x >= 0 && point.x < fields.length &&
+    const inBounds = (point: Point) => point.x >= 0 && point.x < fields.length &&
         point.y >= 0 && point.y < fields[0].length;
     const start = startMine.position;
     dx.map((x, i) => ({dx: x, dy: dy[i]}))
