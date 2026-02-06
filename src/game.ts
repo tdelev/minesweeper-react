@@ -198,5 +198,6 @@ export const game = {
     checkCompleted: checkCompleted,
     markMine: markMine,
     openMine: openMine,
+    exploreOpenedField: exploreOpenedField,
     BOMBS_PROBABILITY: BOMBS_PROBABILITY
 };
